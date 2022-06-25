@@ -1,0 +1,14 @@
+{
+  "name": "maze-game",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "matter-js": "^0.18.0",
+    "vite": "^2.9.9"
+  }
+}

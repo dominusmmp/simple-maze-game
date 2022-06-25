@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Maze Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-size: 16px;
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    }
+
+    #win-box {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+      user-select: none;
+    }
+
+    #win-message {
+      font-size: 48px;
+      font-weight: 900;
+      color: crimson;
+      margin-bottom: 16px;
+    }
+
+    button,
+    .button {
+      width: 180px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: Thistle;
+      color: BlueViolet;
+      font-size: 16px;
+      border: none;
+      outline: none;
+      padding: 6px 12px;
+      margin-top: 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 6px 10px rgba(216, 191, 216, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background-color: Plum;
+      color: DarkMagenta;
+    }
+
+    button:active {
+      background-color: Lavender;
+      color: MediumPurple;
+    }
+
+    #next,
+    #close-menu {
+      display: none;
+    }
+
+    #controller {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: transparent;
+      overflow: hidden;
+      user-select: none;
+      padding: 0;
+      z-index: 10;
+    }
+
+    .controllers {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .control-buttons {
+      display: grid;
+      grid-template: "a b"
+        "d c";
+      transform: rotate(45deg);
+    }
+
+    .control-button {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      background-color: transparent;
+      position: relative;
+    }
+
+    .up {
+      grid-area: a;
+    }
+
+    .right {
+      grid-area: b;
+    }
+
+    .down {
+      grid-area: c;
+    }
+
+    .left {
+      grid-area: d;
+    }
+
+    #status {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      gap: 4px;
+      z-index: 15;
+      user-select: none;
+    }
+
+    #status button,
+    #status .button {
+      width: auto;
+      font-size: 0.6rem;
+      background-color: rgba(216, 191, 216, 0.8);
+      color: maroon;
+      padding: 4px 8px;
+      margin: 0;
+    }
+
+    .not-pointer {
+      cursor: default !important;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- <div id="app"></div> -->
+  <div id="controller">
+    <div class="controllers">
+      <div class="control-buttons">
+        <div class="control-button up"></div>
+        <div class="control-button right"></div>
+        <div class="control-button down"></div>
+        <div class="control-button left"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="win-box">
+    <div id="win-message">
+      YOU WON!
+    </div>
+
+    <button id="next">
+      Next Level
+    </button>
+
+    <button id="close-menu">
+      Close Menu
+    </button>
+
+    <button id="reply">
+      Reply Curren Level
+    </button>
+
+    <button id="reset">
+      Reset To Level 1
+    </button>
+  </div>
+
+  <div id="status">
+    <button id="open-menu">Menu</button>
+    <div class="button not-pointer">
+      Level: 
+      <span id="level"></span>
+    </div>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+
+</html>
