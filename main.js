@@ -1,7 +1,4 @@
-import { Engine, Render, Runner, World, Bodies, Body, Events, Mouse, MouseConstraint, Composites } from 'matter-js'
-
-// Level 1-30
-const level = parseInt(localStorage.getItem('maze-level')) || 1
+import { Engine, Render, Runner, World, Bodies, Body, Events } from 'matter-js'
 
 // Cells Variable
 const levels = {
@@ -36,6 +33,9 @@ const levels = {
   29: 3.2,
   30: 3.3,
 }
+
+const level = (parseInt(localStorage.getItem('maze-level')) <= Object.keys(levels).length) ? parseInt(localStorage.getItem('maze-level')) : 1
+
 const levelCells = level => {
   return [Math.floor(16 * level), Math.floor(9 * level)]
 }
@@ -61,6 +61,16 @@ const wallsProperties = {
   }
 }
 
+const ballSpeedResistance = 0.3
+const ballSpeedLimit = 15
+const ballSpeed = () => {
+  if (width >= 768) {
+    return 8 - level * 0.1
+  } else {
+    return 5 - level * 0.08
+  }
+}
+
 // Game Engine Initialize
 const engine = Engine.create()
 engine.gravity.y = 0
@@ -79,23 +89,6 @@ const render = Render.create({
 })
 Render.run(render)
 Runner.run(Runner.create(), engine)
-
-// add mouse control
-const mouse = Mouse.create(render.canvas),
-  mouseConstraint = MouseConstraint.create(engine, {
-    mouse: mouse,
-    constraint: {
-      stiffness: 0.002,
-      render: {
-        visible: false
-      },
-      damping: 1
-    }
-  });
-add(mouseConstraint);
-
-// keep the mouse in sync with rendering
-render.mouse = mouse;
 
 // Walls
 add([
@@ -220,8 +213,8 @@ verticals.forEach((row, rowIndex) => {
 const goal = rectangle(
   width - unitLengthX / 2,
   height - unitLengthY / 2,
-  unitLengthX * 0.6,
-  unitLengthY * 0.6,
+  unitLengthX * 0.5,
+  unitLengthY * 0.5,
   {
     label: 'goal',
     isStatic: true,
@@ -243,9 +236,9 @@ const ball = circle(
     render: {
       fillStyle: 'Goldenrod'
     },
-    density: 0.0000000000000000000000001,
-    frictionStatic: 10,
-    frictionAir: 0.8
+    // density: 0.0000000000000000000000001,
+    // frictionStatic: 10,
+    frictionAir: ballSpeedResistance
   },
 )
 add(ball)
@@ -255,67 +248,103 @@ document.addEventListener('keydown', event => {
   const { x, y } = ball.velocity
 
   if (event.keyCode === 87 || event.keyCode === 38) {
-    if (ball.velocity.y > -20) {
-      Body.setVelocity(ball, { x, y: y - 30 });
+    if (ball.velocity.y > -ballSpeedLimit) {
+      Body.setVelocity(ball, { x, y: y - ballSpeed() });
     }
   }
 
   if (event.keyCode === 68 || event.keyCode === 39) {
-    if (ball.velocity.x < 20) {
-      Body.setVelocity(ball, { x: x + 30, y });
+    if (ball.velocity.x < ballSpeedLimit) {
+      Body.setVelocity(ball, { x: x + ballSpeed(), y });
     }
   }
 
   if (event.keyCode === 83 || event.keyCode === 40) {
-    if (ball.velocity.y < 20) {
-      Body.setVelocity(ball, { x, y: y + 30 });
+    if (ball.velocity.y < ballSpeedLimit) {
+      Body.setVelocity(ball, { x, y: y + ballSpeed() });
     }
   }
 
   if (event.keyCode === 65 || event.keyCode === 37) {
-    if (ball.velocity.x > -20) {
-      Body.setVelocity(ball, { x: x - 30, y });
+    if (ball.velocity.x > -ballSpeedLimit) {
+      Body.setVelocity(ball, { x: x - ballSpeed(), y });
     }
   }
 })
 
-// Controller
+// Touch Controller Buttons
+const touchController = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+touchController.setAttributeNS(null, "viewBox", `0 0 ${width} ${height}`)
+touchController.setAttributeNS(null, "width", width)
+touchController.setAttributeNS(null, "height", height)
+
+// Botton Up
+const btnUp = document.createElementNS("http://www.w3.org/2000/svg", "polygon")
+btnUp.setAttributeNS(null, "points", `0,0 ${width / 2},${height / 2} ${width},0`)
+btnUp.setAttributeNS(null, "id", "moveUp")
+btnUp.setAttributeNS(null, "fill", "transparent")
+touchController.appendChild(btnUp)
+
+// Button Right
+const btnRight = document.createElementNS("http://www.w3.org/2000/svg", "polygon")
+btnRight.setAttributeNS(null, "points", `${width},0 ${width / 2},${height / 2} ${width},${height}`)
+btnRight.setAttributeNS(null, "id", "moveRight")
+btnRight.setAttributeNS(null, "fill", "transparent")
+touchController.appendChild(btnRight)
+
+// Button Down
+const btnDown = document.createElementNS("http://www.w3.org/2000/svg", "polygon")
+btnDown.setAttributeNS(null, "points", `0,${height} ${width / 2},${height / 2} ${width},${height}`)
+btnDown.setAttributeNS(null, "id", "moveDown")
+btnDown.setAttributeNS(null, "fill", "transparent")
+touchController.appendChild(btnDown)
+
+// Button Left
+const btnLeft = document.createElementNS("http://www.w3.org/2000/svg", "polygon")
+btnLeft.setAttributeNS(null, "points", `0,0 ${width / 2},${height / 2} 0,${height}`)
+btnLeft.setAttributeNS(null, "id", "moveLeft")
+btnLeft.setAttributeNS(null, "fill", "transparent")
+touchController.appendChild(btnLeft)
+
+document.querySelector('#controller').appendChild(touchController)
+
+// Touch Controller Behaviour
 let interval;
 const controller = (element, direction) => {
-  clearInterval(interval)
   const { x, y } = ball.velocity
 
   const control = event => {
+    clearInterval(interval)
     if (direction === 'up') {
       interval = setInterval(() => {
-        if (ball.velocity.y > -20) {
-          Body.setVelocity(ball, { x, y: y - 20 });
+        if (ball.velocity.y > -ballSpeedLimit) {
+          Body.setVelocity(ball, { x, y: y - ballSpeed() });
         }
-      }, 10)
+      }, 1)
     }
 
     if (direction === 'right') {
       interval = setInterval(() => {
-        if (ball.velocity.x < 20) {
-          Body.setVelocity(ball, { x: x + 20, y });
+        if (ball.velocity.x < ballSpeedLimit) {
+          Body.setVelocity(ball, { x: x + ballSpeed(), y });
         }
-      }, 10)
+      }, 1)
     }
 
     if (direction === 'down') {
       interval = setInterval(() => {
-        if (ball.velocity.y < 20) {
-          Body.setVelocity(ball, { x, y: y + 20 });
+        if (ball.velocity.y < ballSpeedLimit) {
+          Body.setVelocity(ball, { x, y: y + ballSpeed() });
         }
-      }, 10)
+      }, 1)
     }
 
     if (direction === 'left') {
       interval = setInterval(() => {
-        if (ball.velocity.x > -20) {
-          Body.setVelocity(ball, { x: x - 20, y });
+        if (ball.velocity.x > -ballSpeedLimit) {
+          Body.setVelocity(ball, { x: x - ballSpeed(), y });
         }
-      }, 10)
+      }, 1)
     }
   }
 
@@ -326,21 +355,22 @@ const controller = (element, direction) => {
   // el.addEventListener('pointerout', () => clearInterval(interval))
 }
 
-controller('.up', 'up')
-controller('.right', 'right')
-controller('.down', 'down')
-controller('.left', 'left')
+controller('#moveUp', 'up')
+controller('#moveRight', 'right')
+controller('#moveDown', 'down')
+controller('#moveLeft', 'left')
 
+// Win Condition
 Events.on(engine, 'collisionStart', event => {
   event.pairs.forEach(collosion => {
     const labels = ['ball', 'goal']
 
     if (labels.includes(collosion.bodyA.label) &&
       labels.includes(collosion.bodyB.label)) {
-      if (level === 30) {
+      if (level === Object.keys(levels).length) {
         document.querySelector('#win-message').textContent = "Yay! You've finished all levels. Love You!"
       }
-      if (level < 30) {
+      if (level < Object.keys(levels).length) {
         document.querySelector('#next').style.display = 'flex'
       }
       document.querySelector('#win-box').style.display = 'flex'
@@ -362,6 +392,7 @@ Events.on(engine, 'collisionStart', event => {
   })
 })
 
+// Menu
 document.querySelector('#next').addEventListener('click', event => {
   event.preventDefault()
   localStorage.setItem('maze-level', level + 1)

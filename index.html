@@ -85,47 +85,6 @@
       z-index: 10;
     }
 
-    .controllers {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100vw;
-      height: 100vh;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .control-buttons {
-      display: grid;
-      grid-template: "a b"
-        "d c";
-      transform: rotate(45deg);
-    }
-
-    .control-button {
-      display: flex;
-      width: 100vw;
-      height: 100vh;
-      background-color: transparent;
-      position: relative;
-    }
-
-    .up {
-      grid-area: a;
-    }
-
-    .right {
-      grid-area: b;
-    }
-
-    .down {
-      grid-area: c;
-    }
-
-    .left {
-      grid-area: d;
-    }
-
     #status {
       position: fixed;
       top: 16px;
@@ -153,17 +112,7 @@
 </head>
 
 <body>
-  <!-- <div id="app"></div> -->
-  <div id="controller">
-    <div class="controllers">
-      <div class="control-buttons">
-        <div class="control-button up"></div>
-        <div class="control-button right"></div>
-        <div class="control-button down"></div>
-        <div class="control-button left"></div>
-      </div>
-    </div>
-  </div>
+  <div id="controller"></div>
 
   <div id="win-box">
     <div id="win-message">
@@ -190,7 +139,7 @@
   <div id="status">
     <button id="open-menu">Menu</button>
     <div class="button not-pointer">
-      Level: 
+      Level:
       <span id="level"></span>
     </div>
   </div>
